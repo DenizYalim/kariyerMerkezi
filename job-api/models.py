@@ -10,8 +10,12 @@ class JobPosition(db.Model):
     city = db.Column(db.String)
     tags = db.Column(db.String) # Yes all tags are stored inside one String seperated by columns.
 
-    def __init__(self):
-        pass
+    def __init__(self, title=None, description=None, city=None, tags=None):
+        self.title = title
+        self.description = description
+        self.city = city
+        self.tags = tags
+
 
 
     def get_tags_list(self):
@@ -22,11 +26,10 @@ class JobPosition(db.Model):
     def set_tags_list(self, tags_list):
         self.tags = ",".join(tags_list)
 
-
     def addToDB(self):
         db.session.add(self)
         db.session.commit()
-
+    
     @staticmethod
     def get_all():
         """Return all job positions."""

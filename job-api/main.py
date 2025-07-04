@@ -26,12 +26,27 @@ def hello():
 @app.route("/getJobs", methods=["GET"])
 def getJobs():
 
+    job_id = request.args.get("id")
     title = request.args.get("title")
+    city = request.args.get("city")
+    
+    query = JobPosition.query
+
+    if job_id:
+        job = query.filter_by(id=job_id).first()
+        return jsonify({
+            "id": job.id,
+            "title": job.title,
+            "description": job.description,
+            "city": job.city,
+            "tags": job.tags
+        })
 
     if title:
-        jobs = JobPosition.query.filter_by(title=title).all()
-    else:
-        jobs = JobPosition.query.all()
+        query = query.filter_by(title=title)
+
+    if city:
+        query = query.filter_by(city=city)
 
     positions = [
         {
@@ -41,18 +56,40 @@ def getJobs():
             "city": j.city,
             "tags": j.tags,
         }
-        for j in jobs
+        for j in query
     ]
 
     return jsonify(positions)
 
-
-
-
 @app.route("/addJobListing", methods=["POST"])
 def addJobListing():
-    pass
+    data = request.get_json()
 
+    if not data or "title" not in data:
+        return jsonify({"error": "Title is required"}), 400
+
+    new_job = JobPosition(
+        title=data.get("title"),
+        description=data.get("description"),
+        city=data.get("city"),
+        tags=data.get("tags")
+    )
+
+    new_job.addToDB()
+
+    return jsonify({"message": "Job added successfully to db!", "job_id": new_job.id}), 201
+
+
+@app.route('/deleteJob/<int:job_id>', methods=['DELETE'])
+def delete_job(job_id):
+    job = JobPosition.query.filter_by(id=job_id).first()
+
+    if job:
+        db.session.delete(job)
+        db.session.commit()
+        return jsonify({"message": f"Sucessfully removed job with id: {job.id}"}), 200
+    
+    return jsonify({"error": "job wasn't found"}), 404
 
 if __name__ == "__main__":
     create_db()
