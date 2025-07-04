@@ -20,7 +20,7 @@ def proxy_request(target_url):
 
     return Response(resp.content, resp.status_code, headers)
 
-@app.route("/ping_gateway", methods = ["GET", "POST", "PATCH", "DELETE"])
+@app.route("/ping", methods = ["GET", "POST", "PATCH", "DELETE"])
 def ping_gateway():
     message =  "pinged python api gateway"
     return Response(message, 200, mimetype='text/plain')
